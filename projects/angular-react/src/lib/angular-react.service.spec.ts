@@ -1,5 +1,4 @@
 import { TestBed } from '@angular/core/testing';
-
 import { AngularReactService } from './angular-react.service';
 
 describe('AngularReactService', () => {
