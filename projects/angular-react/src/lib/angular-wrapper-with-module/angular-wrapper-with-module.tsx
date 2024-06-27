@@ -53,11 +53,9 @@ function AngularWrapperWithModule(
       "AngularWrapperWithModule needs an injector but none was provided"
     );
 
-  const [componentFactory, setComponentFactory] =
-    useState<ng.ComponentFactory<any> | null>(null);
   const [renderedComponent, setRenderedComponent] =
     useState<ng.ComponentRef<any> | null>(null);
-  const [renderedElement, setRenderedElement] =
+    const [renderedElement, setRenderedElement] =
     useState<HTMLElement | null>(null);
 
   useImperativeHandle(ref, () => renderedComponent!, [renderedComponent]);
@@ -113,10 +111,6 @@ function AngularWrapperWithModule(
       const projectableNodes = ngContentContainerEl
         ? [[ngContentContainerEl]]
         : [];
-      const componentFactory =
-        ngModuleRef.componentFactoryResolver.resolveComponentFactory(
-          ngComponent
-        );
 
       // extend the injector with our passed react context
       // so the nested react-wrappers can access it
@@ -129,16 +123,21 @@ function AngularWrapperWithModule(
         parent: ngInjector,
       });
 
-      const componentRef = componentFactory.create(
-        injectorForComponent,
+      const environmentInjector = ngInjector.get(ng.EnvironmentInjector);
+
+      const componentRef = ng.createComponent(ngComponent, {
+        environmentInjector,
+        elementInjector: injectorForComponent,
+        hostElement: node,
         projectableNodes,
-        node
-      );
+      });
 
       const appRef = ngInjector.get(ng.ApplicationRef);
       appRef.attachView(componentRef.hostView);
 
-      setComponentFactory(componentFactory);
+      for (const [key, value] of Object.entries(inputs || {})) {
+        componentRef.setInput(key, value);
+      }
       setRenderedComponent(componentRef);
     },
     // inputs doesn't need to be a dep, this is already handled in the next useEffect
@@ -148,27 +147,13 @@ function AngularWrapperWithModule(
 
   useEffect(() => {
     if (!renderedComponent) return;
-    if (!componentFactory) return;
-
-    // TODO: In Angular 14, there's a new `setInput` method on ComponentRef, which should be used
     for (const [key, value] of Object.entries(inputs || {})) {
-      const inputSettings = componentFactory.inputs.find(
-        ({ templateName }) => templateName === key
-      );
-      if (!inputSettings) throw new Error(`Unknown input: ${key}`);
-      renderedComponent.instance[inputSettings.propName] = value;
+      renderedComponent.setInput(key, value);
     }
-    // Somehow you can't just call detectChanges on renderedComponent.changeDetectorRef
-    // The change detector is not the same as the one you would inject in the constructor
-    // see https://github.com/angular/angular/issues/36667 and https://github.com/angular/angular/issues/18817
-    // This will also be fixed when using `setInput`
-    renderedComponent.injector.get(ng.ChangeDetectorRef).detectChanges();
-    renderedComponent.changeDetectorRef.detectChanges();
-  }, [renderedComponent, componentFactory, inputs]);
+  }, [renderedComponent, inputs]);
 
   useEffect(() => {
     if (!renderedComponent) return;
-    if (!componentFactory) return;
     if (!outputs) return;
     if (!ngInjector) return;
 
@@ -177,16 +162,7 @@ function AngularWrapperWithModule(
     const subscriptions: Unsubscribable[] = [];
 
     for (const [key, handler] of Object.entries(outputs || {})) {
-      const outputSettings = componentFactory.outputs.find(
-        ({ templateName }) => templateName === key
-      );
-      if (!outputSettings) throw new Error(`Unknown output: ${key}`);
-
-      const outputEmitter: Subscribable<any> =
-        renderedComponent.instance[outputSettings.propName];
-
-      if (!outputEmitter)
-        throw new Error(`Output not found: ${outputSettings.propName}`);
+      const outputEmitter: Subscribable<any> = renderedComponent.instance[key];
 
       const subscription = outputEmitter.subscribe({
         next: (value: any) => {
@@ -202,7 +178,7 @@ function AngularWrapperWithModule(
         subscription.unsubscribe();
       }
     };
-  }, [renderedComponent, componentFactory, outputs, ngInjector]);
+  }, [renderedComponent, outputs, ngInjector]);
 
   useEffect(() => {
     if (!renderedComponent) return;
