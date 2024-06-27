@@ -4,7 +4,9 @@ import { AfterViewInit, ChangeDetectionStrategy, Component, Input, TemplateRef, 
   selector: 'react-to-template-ref',
   template: `
     <ng-template #tmpl let-props="props">
-      <react-wrapper *ngIf="component" [component]="component" [props]="props"></react-wrapper>
+      @if (component) {
+        <react-wrapper [component]="component" [props]="props" />
+      }
     </ng-template>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
