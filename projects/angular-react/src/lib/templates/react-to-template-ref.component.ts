@@ -1,13 +1,18 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, Input, TemplateRef, ViewChild } from '@angular/core';
+import { ReactWrapperComponent } from '../react-wrapper/react-wrapper.component';
 
 @Component({
   selector: 'react-to-template-ref',
   template: `
     <ng-template #tmpl let-props="props">
-      <react-wrapper *ngIf="component" [component]="component" [props]="props"></react-wrapper>
+      @if (component) {
+        <react-wrapper [component]="component" [props]="props" />
+      }
     </ng-template>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [ReactWrapperComponent],
+  standalone: true
 })
 export class ReactToTemplateRefComponent<C> implements AfterViewInit {
   @Input() public component!: any;
