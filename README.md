@@ -10,7 +10,7 @@
 This is a small Angular library that lets you use React components inside Angular projects.
 
 ```html
-<react-wrapper [component]="Button" [props]="{ children: 'Hello world!' }">
+<react-wrapper [component]="Button" [props]="{ children: 'Hello world!' }"></react-wrapper>
 ```
 
 ```tsx
@@ -25,18 +25,6 @@ function ReactComponent({ text }) {
 npm i @bubblydoo/angular-react
 ```
 
-```ts
-import { AngularReactModule } from '@bubblydoo/angular-react'
-
-@NgModule({
-  ...,
-  imports: [
-    ...,
-    AngularReactModule
-  ]
-})
-```
-
 ## Features
 
 ### `ReactWrapperComponent`
@@ -44,19 +32,20 @@ import { AngularReactModule } from '@bubblydoo/angular-react'
 Use this component when you want to use React in Angular.
 
 It takes two inputs:
+
 - `component`: A React component
 - `props?`: The props you want to pass to the React component
 
 The React component will be first rendered on `ngAfterViewInit` and rerendered on every `ngOnChanges` call.
 
 ```ts
-import Button from './button'
+import Button from "./button";
 
 @Component({
-  template: `<react-wrapper [component]="Button" [props]="{ children: 'Hello world!' }">`
+  template: `<react-wrapper [component]="Button" [props]="{ children: 'Hello world!' }" />`,
 })
 class AppComponent {
-  Button = Button
+  Button = Button;
 }
 ```
 
@@ -65,6 +54,7 @@ class AppComponent {
 Use this component when you want to use Angular in React.
 
 It takes a few inputs:
+
 - `component`: An Angular component
 - `inputs?`: The inputs you want to pass to the Angular component, in an object
 - `outputs?`: The outputs you want to pass to the Angular component, in an object
@@ -72,15 +62,10 @@ It takes a few inputs:
 - `ref?`: The ref to the rendered DOM element (uses `React.forwardRef`)
 
 ```tsx
-import { TextComponent } from './text/text.component'
+import { TextComponent } from "./text/text.component";
 
 function Text(props) {
-  return (
-    <AngularWrapper
-      component={TextComponent}
-      inputs={{ text: props.text }}
-      events={{ click: () => console.log('clicked') }}/>
-  )
+  return <AngularWrapper component={TextComponent} inputs={{ text: props.text }} events={{ click: () => console.log("clicked") }} />;
 }
 ```
 
@@ -89,9 +74,9 @@ function Text(props) {
 The Angular Injector is provided on each React component by default using React Context. You can use Angular services and other injectables with it:
 
 ```tsx
-import { useInjected } from '@bubblydoo/angular-react'
+import { useInjected } from "@bubblydoo/angular-react";
 
-const authService = useInjected(AuthService)
+const authService = useInjected(AuthService);
 ```
 
 ### `useObservable`
@@ -148,19 +133,19 @@ To forward a ref to a React component, you can simply use the props:
 
 ```tsx
 const Message = forwardRef((props, ref) => {
-  return <div ref={ref}>{props.message}</div>
-})
+  return <div ref={ref}>{props.message}</div>;
+});
 
 @Component({
-  template: `<react-wrapper [component]="Message" [props]="{ ref, message }">`,
+  template: `<react-wrapper [component]="Message" [props]="{ ref, message }" />`,
 })
 export class MessageComponent {
-  Message = Message
+  Message = Message;
 
-  message = 'hi!'
+  message = "hi!";
 
   ref(div: HTMLElement) {
-    div.innerHTML = 'hi from the callback ref!'
+    div.innerHTML = "hi from the callback ref!";
   }
 }
 ```
@@ -174,19 +159,19 @@ export class MessageComponent {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class InnerComponent {
-  number$ = this.contexts.read(NumberContext)
+  number$ = this.contexts.read(NumberContext);
 
   constructor(@Inject(InjectableReactContextToken) public contexts: InjectableReactContext) {}
 }
 
 function App() {
-  const [number, setNumber] = useState(42)
+  const [number, setNumber] = useState(42);
   return (
     <NumberContext.Provider value={number}>
       <button onClick={() => setNumber(number + 1)}>increment</button>
       <AngularWrapper component={InnerComponent} />
     </NumberContext.Provider>
-  )
+  );
 }
 ```
 
@@ -195,40 +180,39 @@ function App() {
 #### `useToAngularTemplateRef`: to convert a React component into a `TemplateRef`
 
 ```tsx
-import { useToAngularTemplateRef } from "@bubblydoo/angular-react"
+import { useToAngularTemplateRef } from "@bubblydoo/angular-react";
 
 @Component({
-  selector: 'message',
+  selector: "message",
   template: `
     <div>
-      <ng-container
-        [ngTemplateOutlet]="tmpl"
-        [ngTemplateOutletContext]="{ message }"
-        [ngTemplateOutletInjector]="injector"
-      ></ng-container>
+      <ng-container [ngTemplateOutlet]="tmpl" [ngTemplateOutletContext]="{ message }" [ngTemplateOutletInjector]="injector" />
     </div>
   `,
 })
 class MessageComponent {
-  @Input() tmpl: TemplateRef<{ message: string }>
-  @Input() message: string
+  @Input() tmpl: TemplateRef<{ message: string }>;
+  @Input() message: string;
 
   constructor(public injector: Injector) {}
 }
 
 function Text(props: { message: string }) {
-  return <>{props.message}</>
+  return <>{props.message}</>;
 }
 
 function Message(props: { message: string }) {
-  const tmpl = useToAngularTemplateRef(Text)
+  const tmpl = useToAngularTemplateRef(Text);
 
-  const inputs = useMemo(() => ({
-    message: props.message,
-    tmpl,
-  }), [props.message, tmpl])
+  const inputs = useMemo(
+    () => ({
+      message: props.message,
+      tmpl,
+    }),
+    [props.message, tmpl]
+  );
 
-  return <AngularWrapper component={MessageComponent} inputs={inputs} />
+  return <AngularWrapper component={MessageComponent} inputs={inputs} />;
 }
 ```
 
@@ -237,13 +221,10 @@ Note: `useToAngularTemplateRef` is meant for usage with `[ngTemplateOutletInject
 #### `useFromAngularTemplateRef`: to convert a `TemplateRef` into a React component
 
 ```tsx
-function Message(props: {
-  message: string
-  tmpl: TemplateRef<{ message: string }>
-}) {
-  const Template = useFromAngularTemplateRef(props.tmpl)
+function Message(props: { message: string; tmpl: TemplateRef<{ message: string }> }) {
+  const Template = useFromAngularTemplateRef(props.tmpl);
 
-  return <Template message={props.message.toUpperCase()} />
+  return <Template message={props.message.toUpperCase()} />;
 }
 
 @Component({
@@ -251,17 +232,14 @@ function Message(props: {
   template: `
     <ng-template #tmpl let-message="message">{{ message }}</ng-template>
     <div>
-      <react-wrapper
-        [component]="Message"
-        [props]="{ tmpl, message }"
-      ></react-wrapper>
+      <react-wrapper [component]="Message" [props]="{ tmpl, message }" />
     </div>
   `,
 })
 class MessageComponent {
-  Message = Message
+  Message = Message;
 
-  @Input() message!: string
+  @Input() message!: string;
 }
 ```
 
@@ -312,13 +290,13 @@ Angular component methods are always called with the component instance as `this
 
 ```ts
 @Component({
-  template: `<react-wrapper [component]="Button" [props]="{ onClick }">`
+  template: `<react-wrapper [component]="Button" [props]="{ onClick }" />`,
 })
 class AppComponent {
-  Button = Button
+  Button = Button;
 
   onClick() {
-    console.log(this) // undefined
+    console.log(this); // undefined
   }
 }
 ```
@@ -327,14 +305,14 @@ You can fix it as follows:
 
 ```ts
 @Component({
-  template: `<react-wrapper [component]="Button" [props]="{ onClick }">`
+  template: `<react-wrapper [component]="Button" [props]="{ onClick }" />`,
 })
 class AppComponent {
-  Button = Button
+  Button = Button;
 
   onClick = () => {
-    console.log(this) // AppComponent instance
-  }
+    console.log(this); // AppComponent instance
+  };
 }
 ```
 
