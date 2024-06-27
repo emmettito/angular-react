@@ -10,11 +10,12 @@
     "url": "https://github.com/bubblydoo/angular-react.git"
   },
   "peerDependencies": {
-    "@angular/common": ">14.0.0",
-    "@angular/core": ">14.0.0",
-    "its-fine": "^1.1.1"
+    "@angular/common": "^18.0.0",
+    "@angular/core": "^18.0.0",
+    "its-fine": "^1.2.5"
   },
   "dependencies": {
     "tslib": "^2.3.0"
-  }
+  },
+  "sideEffects": false
 }

@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -14,9 +15,11 @@ import {
       [ngTemplateOutlet]="tmpl"
       [ngTemplateOutletContext]="tmplContext"
       [ngTemplateOutletInjector]="tmplInjector"
-    ></ng-container>
+    />
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [NgTemplateOutlet],
+  standalone: true
 })
 export class TemplateOutletComponent {
   @Input() public tmpl!: TemplateRef<any>;

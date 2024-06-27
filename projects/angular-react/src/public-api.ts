@@ -3,7 +3,6 @@
  */
 
 export * from './lib/angular-react.service';
-export * from './lib/angular-react.module';
 export * from './lib/react-wrapper/react-wrapper.component';
 export * from './lib/angular-context/angular-context';
 export * from './lib/angular-wrapper/angular-wrapper';

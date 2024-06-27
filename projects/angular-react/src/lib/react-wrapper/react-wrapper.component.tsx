@@ -24,8 +24,9 @@ import { IsTopLevelReactToken } from "../templates/is-top-level-react-token";
 
 @Component({
   selector: "react-wrapper",
-  template: "<ng-template #children><ng-content></ng-content></ng-template>",
+  template: `<ng-template #children><ng-content/></ng-template>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true
 })
 export class ReactWrapperComponent
   implements OnChanges, OnDestroy, AfterViewInit

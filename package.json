@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "cd projects/angular-react && cp ../../README.md . && node build.mjs && cp ../../LICENSE ../../README.md ../../dist/angular-react",
+    "build": "cd projects/angular-react && cp ../../README.md . && ng build && cp ../../LICENSE ../../README.md ../../dist/angular-react",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "storybook": "start-storybook -p 6006",
